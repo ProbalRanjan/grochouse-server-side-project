@@ -3,7 +3,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 // Middleware
@@ -21,11 +21,26 @@ async function run() {
         await client.connect();
         const itemsCollection = client.db('grocHouse').collection('items');
 
-        app.get('/items', async (req, res) => {
+        // Get Data from database
+        app.get('/inventory', async (req, res) => {
             const query = {};
             const cursor = itemsCollection.find(query);
             const items = await cursor.toArray();
             res.send(items);
+        })
+
+        app.get('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const item = await itemsCollection.findOne(query);
+            res.send(item)
+        })
+
+        // POST Data to Database
+        app.post('/inventory', async (req, res) => {
+            const newInventory = req.body;
+            const result = await itemsCollection.insertOne(newInventory);
+            res.send(result);
         })
 
     }
