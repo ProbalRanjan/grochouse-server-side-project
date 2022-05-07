@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
 const cors = require('cors');
+require('dotenv').config();
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 
@@ -13,19 +14,19 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.tjy2f.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-/* client.connect(err => {
-    const collection = client.db("grocHouse").collection("items");
-
-    console.log("Mongo")
-    // perform actions on the collection object
-    client.close();
-}); */
-
+// Database CRUD Operations
 async function run() {
     try {
 
         await client.connect();
         const itemsCollection = client.db('grocHouse').collection('items');
+
+        app.get('/items', async (req, res) => {
+            const query = {};
+            const cursor = itemsCollection.find(query);
+            const items = await cursor.toArray();
+            res.send(items);
+        })
 
     }
     finally {
