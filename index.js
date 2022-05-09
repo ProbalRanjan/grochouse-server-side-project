@@ -1,9 +1,9 @@
 const express = require('express');
-const app = express();
-const port = process.env.PORT || 5000;
 const cors = require('cors');
-require('dotenv').config();
+const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+require('dotenv').config();
+const port = process.env.PORT || 5000;
 
 
 // Middleware
@@ -52,7 +52,7 @@ async function run() {
             res.send(result)
         })
 
-        // 
+        // Restock the Quantity of inventory
         app.post('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const restockQuantity = req.body;
@@ -65,6 +65,16 @@ async function run() {
             };
             const result = await itemsCollection.updateOne(filter, updateDoc, options);
             res.send(result);
+        })
+
+        // GET method to get inventory in specific user
+        app.get('/myinventory', async (req, res) => {
+            const email = req.query.email;
+            console.log(email);
+            const query = { email: email };
+            const cursor = itemsCollection.find(query);
+            const myInventory = await cursor.toArray();
+            res.send(myInventory);
         })
 
         // POST method to add Data to Database
