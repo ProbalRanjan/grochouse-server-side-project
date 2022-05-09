@@ -21,7 +21,7 @@ async function run() {
         await client.connect();
         const itemsCollection = client.db('grocHouse').collection('items');
 
-        // Get Data from database
+        // Get all Data from database
         app.get('/inventory', async (req, res) => {
             const query = {};
             const cursor = itemsCollection.find(query);
@@ -29,6 +29,7 @@ async function run() {
             res.send(items);
         })
 
+        // Get Single data from database by id
         app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -36,6 +37,7 @@ async function run() {
             res.send(item)
         })
 
+        // Put method to deliver inventory
         app.put('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const newQuantity = req.body;
@@ -50,7 +52,22 @@ async function run() {
             res.send(result)
         })
 
-        // POST Data to Database
+        // 
+        app.post('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const restockQuantity = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    quantity: restockQuantity
+                },
+            };
+            const result = await itemsCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
+        // POST method to add Data to Database
         app.post('/inventory', async (req, res) => {
             const newInventory = req.body;
             const result = await itemsCollection.insertOne(newInventory);
